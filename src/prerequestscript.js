@@ -1,3 +1,5 @@
+/* https://github.com/acquia/http-hmac-postman/blob/master/src/prerequestscript.js */
+
 /*
  * HTTP-HMAC-POSTMAN
  * VERSION: 1.1.4
@@ -30,12 +32,12 @@
  *
  */
 
-var publicKey = postman.getEnvironmentVariable('env_pubkey') || '';
-var secretKey = postman.getEnvironmentVariable('env_secretkey') || '';
-var hmacRealm = postman.getEnvironmentVariable('env_realm') || '';
+var publicKey = pm.collectionVariables.get('pub_key') || '';
+var secretKey = pm.collectionVariables.get('secret_key') || '';
+var hmacRealm = pm.collectionVariables.get('realm') || '';
 
 // Decide what to do with the secret
-var hasAlreadyEncodedSecret = postman.getEnvironmentVariable('secretIsBase64encoded') || true;
+var hasAlreadyEncodedSecret = pm.collectionVariables.get('secretIsBase64encoded') || true;
 
 
 //############################################################################
@@ -445,9 +447,12 @@ var AcquiaHttpHmac = function () {
         request.acquiaHttpHmac.timestamp = x_authorization_timestamp;
         request.acquiaHttpHmac.nonce = nonce;
 
-        postman.setEnvironmentVariable('acqHmacTimestamp',x_authorization_timestamp);
-        postman.setEnvironmentVariable('acqHmacHeader', authorization);
-        postman.setEnvironmentVariable('acqHmacContentSha',x_authorization_content_sha256);
+        pm.request.headers.add({key: 'X-Authorization-Timestamp', value: x_authorization_timestamp});
+        pm.request.headers.add({key: 'Authorization', value: authorization});
+        if (x_authorization_content_sha256 != '') {
+          pm.request.headers.add({key: 'X-Authorization-Content-SHA256', value: x_authorization_content_sha256});
+        }
+        pm.request.headers.add({key: 'X-Authenticated-Id', value: pm.collectionVariables.get('account_id')});
 
         void 0;
         void 0;
